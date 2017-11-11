@@ -31,4 +31,4 @@ test: $(TESTOBJ) $(filter-out $(SRCDIR)/RunMandelbrot.o,$(OBJ)) gtest_src/gtest/
 	$(TESTDIR)/runTests
 
 clean:
-	rm -f RunMandelbrot runTests $(SRCDIR)/*.o $(TESTDIR)/*.o gtest_src/gtest/gtest-all.o *~ core
+	rm -f RunMandelbrot $(TESTDIR)/runTests $(SRCDIR)/*.o $(TESTDIR)/*.o gtest_src/gtest/gtest-all.o *~ core
