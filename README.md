@@ -12,6 +12,7 @@ Run `make test` to build and run unit tests
 
 ## Usage
 
+```
 Usage: mandelbrot [OPTION...]
   -w, --width=VALUE            Image width (default: 800)
   -h, --height=VALUE           Image height (default: 600)
@@ -19,6 +20,7 @@ Usage: mandelbrot [OPTION...]
   -m, --max-iterations         Mandelbrot maximum iterations (default: 1000)
   -o, --output=FILE            Write fractal image to bitmap file
   -?, --help                   Show this help message
+```
 
 ## Example run
 
