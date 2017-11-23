@@ -6,13 +6,14 @@
  */
 
 #include "Mandelbrot.h"
-#include "Bitmap.h"
 #include "Zoom.h"
+#include "Bitmap.h"
 
 #include <complex>
 #include <memory>
 #include <algorithm>
 #include <string>
+#include <iostream>
 
 using namespace std;
 
@@ -23,7 +24,7 @@ int Mandelbrot::getIterations(double x, double y) {
 	complex<double> c(x, y);
 
 	int iterations = 0;
-	while (iterations < MAX_ITERATIONS) {
+	while (iterations < maxIterations) {
 		// f(z) = z*z + c
 		z = z*z + c;
 		if (abs(z) > 2) {
@@ -38,21 +39,27 @@ int Mandelbrot::getIterations(double x, double y) {
 
 vector<vector<int> > Mandelbrot::createFractal() {
 	vector<vector<int> > fractals;
+	fractals.reserve(width);
 	for (int x = 0; x < width; x++) {
 		fractals.push_back(vector<int>());
+		fractals.back().reserve(height);
 		for (int y = 0; y < height; y++) {
-			Coords<double> newCoords = zoom.scaleCoords(Coords<int>{.x=x, .y=y});
-			fractals.back().push_back(getIterations(newCoords.x, newCoords.y));
+			pair<double, double> newCoords = zoom.scaleCoords(x, y);
+			fractals.back().push_back(getIterations(newCoords.first, newCoords.second));
 		}
 	}
 	return fractals;
 }
 
-void Mandelbrot::drawFractals(const vector<vector<int> >& fractals,
+vector<vector<Rgb> > Mandelbrot::toImage(const vector<vector<int> >& fractals,
 		const vector<int>& histogram,
-		const vector<IterationRange>& iterationRanges,
-		Bitmap& bitmap) {
+		const vector<IterationRange>& iterationRanges) {
+
+	vector<vector<Rgb> > image;
+	image.reserve(width);
 	for (int x = 0; x < width; ++x) {
+		image.push_back(vector<Rgb>());
+		image.back().reserve(height);
 		for (int y = 0; y < height; ++y) {
 			int iterations = fractals[x][y];
 
@@ -63,7 +70,7 @@ void Mandelbrot::drawFractals(const vector<vector<int> >& fractals,
 			);
 
 			mandelbrot::Rgb color({0,0,0});
-			if (iterations != MAX_ITERATIONS && colorIter != iterationRanges.end()) {
+			if (iterations != maxIterations && colorIter != iterationRanges.end()) {
 				int pixels = 0;
 				for (int i = colorIter->startRange; i <= iterations; ++i) {
 					pixels += histogram[i];
@@ -75,17 +82,18 @@ void Mandelbrot::drawFractals(const vector<vector<int> >& fractals,
 				color.blue = colorIter->startColor.blue + (colorDiff.blue*pixelPerc);
 			}
 
-			bitmap.setPixel(x, y, color);
+			image.back().push_back(color);
 		}
 	}
+	return image;
 }
 
 vector<int> Mandelbrot::createHistogram(const vector<vector<int> >& fractals) {
-	vector<int> histogram(MAX_ITERATIONS, 0);
+	vector<int> histogram(maxIterations, 0);
 	for (int x = 0; x < width; ++x) {
 		for (int y = 0; y < height; ++y) {
 			int iterations = fractals[x][y];
-			if (iterations != MAX_ITERATIONS) {
+			if (iterations != maxIterations) {
 				histogram[iterations]++;
 			}
 		}
@@ -94,14 +102,14 @@ vector<int> Mandelbrot::createHistogram(const vector<vector<int> >& fractals) {
 }
 
 vector<IterationRange> Mandelbrot::createIterationRanges(const vector<int>& histogram) {
-
+	int maxIter = maxIterations;
 	vector<IterationRange> iterationRanges;
-	int startRange = static_cast<int>(colorRanges[0].first*MAX_ITERATIONS);
+	int startRange = static_cast<int>(colorRanges[0].first*maxIterations);
 	Rgb startColor = colorRanges[0].second;
 
 	for_each(colorRanges.begin() + 1, colorRanges.end(),
-		[&histogram, &startRange, &startColor, &iterationRanges](const pair<double, Rgb>& colorRange){
-			int endRange = static_cast<int>(colorRange.first*MAX_ITERATIONS);
+		[&histogram, &startRange, &startColor, &iterationRanges, &maxIter](const pair<double, Rgb>& colorRange){
+			int endRange = static_cast<int>(colorRange.first*maxIter);
 			Rgb endColor = colorRange.second;
 			int iterationRange = 0;
 			for (int i = startRange; i < endRange; ++i) {
@@ -122,13 +130,22 @@ vector<IterationRange> Mandelbrot::createIterationRanges(const vector<int>& hist
 	return iterationRanges;
 }
 
-void Mandelbrot::writeBitmap(const string& filename) {
+vector<vector<Rgb> > Mandelbrot::createFractalImage() {
 	vector<vector<int> > fractals = createFractal();
 	vector<int> histogram = createHistogram(fractals);
 	vector<IterationRange> iterationRanges = createIterationRanges(histogram);
+	return toImage(fractals, histogram, iterationRanges);
+}
 
-	Bitmap bitmap(width, height);
-	drawFractals(fractals, histogram, iterationRanges, bitmap);
+void Mandelbrot::writeToBitmap(const vector<vector<mandelbrot::Rgb> >& image,
+		const string& filename) {
+
+	bitmap::Bitmap bitmap(width, height);
+	for (size_t x = 0; x < image.size(); ++x) {
+		for (size_t y = 0; y < image[x].size(); ++y) {
+			bitmap.setPixel(x, y, image[x][y].red, image[x][y].green, image[x][y].blue);
+		}
+	}
 	bitmap.write(filename);
 }
 

@@ -11,13 +11,13 @@
 
 #include <fstream>
 
-namespace mandelbrot {
+namespace bitmap {
 
-void Bitmap::setPixel(int x, int y, mandelbrot::Rgb color) {
-	int pos = (y*3)*width + x*3;
-	pixels[pos] = color.blue;
-	pixels[pos+1] = color.green;
-	pixels[pos+2] = color.red;
+void Bitmap::setPixel(int x, int y, int red, int green, int blue) {
+	int pos = ((height - y - 1)*3)*width + x*3;
+	pixels[pos] = blue;
+	pixels[pos+1] = green;
+	pixels[pos+2] = red;
 }
 
 void Bitmap::write(const string& filename) {
@@ -45,4 +45,4 @@ void Bitmap::write(const string& filename) {
 	}
 }
 
-} // namespace mandelbrot
+} // namespace bitmap

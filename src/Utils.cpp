@@ -77,5 +77,27 @@ bool diff(const string& file1, const string& file2) {
 	return status;
 }
 
+vector<string> splitString(const string& input, char delimiter) {
+	vector<string> strings;
+
+	size_t idx = 0;
+	size_t found = 0;
+	auto len = input.size();
+	while (idx < len && (found = input.find(delimiter, idx)) != string::npos) {
+		strings.push_back(input.substr(idx, found - idx));
+		idx = found + 1;
+	}
+
+	if (idx < len) {
+		strings.push_back(input.substr(idx, found - idx));
+	}
+	// add empty if last char is a delimeter
+	if (len > 0 && input[len - 1] == delimiter) {
+		strings.push_back("");
+	}
+
+	return strings;
+}
+
 } // namespace utils
 

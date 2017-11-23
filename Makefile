@@ -1,5 +1,5 @@
 CXX=g++
-INC=-Isrc
+INC=-Iinclude
 CXXFLAGS=-std=c++14 -g -Wall -Werror $(INC)
 
 SRCDIR=src
@@ -10,7 +10,7 @@ TESTDIR=test
 TESTSRC=$(wildcard $(TESTDIR)/*.cpp)
 TESTOBJ=$(patsubst $(TESTDIR)/%.cpp, $(TESTDIR)/%.o, $(TESTSRC))
 
-all: RunMandelbrot test
+all: mandelbrot test
 
 $(TESTDIR)/%.o: $(TESTDIR)/%.cpp
 	$(CXX) $(CXXFLAGS) -Igtest_src -c -o $@ $<
@@ -18,17 +18,17 @@ $(TESTDIR)/%.o: $(TESTDIR)/%.cpp
 $(SRCDIR)/%.o: $(SRCDIR)/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-RunMandelbrot: $(OBJ)
+mandelbrot: $(OBJ)
 	$(CXX) -o $@ $^
-
+	
 gtest_src/gtest/gtest-all.o: gtest_src/gtest/gtest-all.cc
 	$(CXX) $(CXXFLAGS) -Igtest_src -c -o $@ $<
 
 .PHONY: clean test
 
-test: $(TESTOBJ) $(filter-out $(SRCDIR)/RunMandelbrot.o,$(OBJ)) gtest_src/gtest/gtest-all.o
+test: $(TESTOBJ) $(filter-out $(SRCDIR)/Main.o,$(OBJ)) gtest_src/gtest/gtest-all.o
 	$(CXX) -o $(TESTDIR)/runTests $^ -lpthread
 	$(TESTDIR)/runTests
 
 clean:
-	rm -f RunMandelbrot $(TESTDIR)/runTests $(SRCDIR)/*.o $(TESTDIR)/*.o gtest_src/gtest/gtest-all.o *~ core
+	rm -f mandelbrot $(TESTDIR)/runTests $(SRCDIR)/*.o $(TESTDIR)/*.o gtest_src/gtest/gtest-all.o *~ core

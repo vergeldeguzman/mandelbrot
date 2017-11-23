@@ -1,5 +1,5 @@
 /*
- * ZoomList.h
+ * Zoom.h
  *
  *  Created on: Oct 26, 2017
  *      Author: vergel
@@ -8,9 +8,8 @@
 #ifndef ZOOM_H_
 #define ZOOM_H_
 
-#include "Coords.h"
-
 #include <iostream>
+#include <utility>
 
 namespace mandelbrot {
 
@@ -18,16 +17,22 @@ class Zoom {
 private:
 	int width{0};
 	int height{0};
+	double centerX{0.0};
+	double centerY{0.0};
 	double scale{1.0};
-	Coords<double> center;
 
 public:
 	Zoom(int width, int height) : width(width), height(height) {}
 	void setScale(double _scale) {
 		scale *= _scale;
 	}
-	void setCenter(const Coords<int>& coords);
-	Coords<double> scaleCoords(const Coords<int>& coords) const;
+	void resetCenter() {
+		centerX = 0.0;
+		centerY = 0.0;
+		scale = 1.0;
+	}
+	void setCenter(int x, int y);
+	std::pair<double, double> scaleCoords(int x, int y) const;
 };
 
 } /* namespace mandelbrot */

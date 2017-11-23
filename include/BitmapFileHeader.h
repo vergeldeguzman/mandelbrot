@@ -1,5 +1,5 @@
 /*
- * FileInfoHeader.h
+ * BitmapFileHeader.h
  *
  *  Created on: Oct 24, 2017
  *      Author: vergel
