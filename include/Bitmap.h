@@ -16,7 +16,7 @@
 
 using namespace std;
 
-namespace mandelbrot {
+namespace bitmap {
 
 class BitmapException : public std::exception {
 public:
@@ -34,16 +34,18 @@ class Bitmap {
 private:
 	uint32_t width;
 	uint32_t height;
-	unique_ptr<uint8_t[]> pixels;
+	std::unique_ptr<uint8_t[]> pixels;
+
 public:
-	Bitmap(uint32_t _width, uint32_t _height) :
-		width(_width),
-		height(_height),
-		pixels(new uint8_t[_width*_height*3]{}) {};
-	void setPixel(int x, int y, mandelbrot::Rgb color);
+	Bitmap(uint32_t width, uint32_t height) :
+		width(width),
+		height(height),
+		pixels(make_unique<uint8_t[]>(width*height*3)) {
+	};
+	void setPixel(int x, int y, int red, int green, int blue);
 	void write(const std::string& filename);
 };
 
-} // namespace mandelbrot
+} // namespace bitmap
 
 #endif /* BITMAP_H_ */

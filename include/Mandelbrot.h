@@ -13,11 +13,9 @@
 #include <array>
 
 #include "Zoom.h"
-#include "Bitmap.h"
+#include "Rgb.h"
 
 namespace mandelbrot {
-
-const int MAX_ITERATIONS = 1000;
 
 struct IterationRange {
 	int startRange;
@@ -30,9 +28,9 @@ struct IterationRange {
 class Mandelbrot {
 private:
 
-	int width{0};
-	int height{0};
-	int totalIterations{0};
+	int width;
+	int height;
+	int maxIterations;
 
 	Zoom zoom;
 	std::vector<std::pair<double, Rgb> > colorRanges;
@@ -41,26 +39,33 @@ private:
 	std::vector<IterationRange> createIterationRanges(const std::vector<int>& histogram);
 	std::vector<int> createHistogram(const std::vector<std::vector<int> >& fractals);
 	std::vector<std::vector<int> > createFractal();
-	void drawFractals(const std::vector<std::vector<int> >& fractals,
+	std::vector<std::vector<Rgb> > toImage(
+			const std::vector<std::vector<int> >& fractals,
 			const std::vector<int>& histogram,
-			const std::vector<IterationRange>& iterationRanges,
-			Bitmap& bitmap);
+			const std::vector<IterationRange>& iterationRanges);
 
 public:
-	Mandelbrot(int width, int height) :
+
+	Mandelbrot(int width, int height, int maxIterations) :
 		width(width),
 		height(height),
+		maxIterations(maxIterations),
 		zoom(width, height) {}
-	void setCenter(const Coords<int>& coords) {
-		zoom.setCenter(coords);
+	void resetCenter() {
+		zoom.resetCenter();
+	}
+	void setCenter(int x, int y) {
+		zoom.setCenter(x, y);
 	}
 	void setScale(double scale) {
 		zoom.setScale(scale);
 	}
-	void addColorRange(std::pair<double, Rgb> colorRange) {
+	void addColorRange(const std::pair<double, Rgb> colorRange) {
 		colorRanges.push_back(colorRange);
 	}
-	void writeBitmap(const std::string& filename);
+	std::vector<std::vector<Rgb> > createFractalImage();
+	void writeToBitmap(const std::vector<std::vector<Rgb> >& image,
+			const std::string& filename);
 };
 
 } // namespace mandelbrot
